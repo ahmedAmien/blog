@@ -1,0 +1,151 @@
+<!-- prettier-ignore -->
+
+{% extends 'blog/base.html' %} 
+{% load static %} 
+{% block title %}
+Share: {{post.title}} 
+{% endblock %}
+{% block body%}
+
+<main>
+  <!-- breadcrumb-area -->
+
+  <!-- breadcrumb-area-end -->
+  <!-- inner-blog -->
+
+  <section class="inner-blog b-details-p pt-30 pb-20">
+    <div class="container">
+
+      <div class="row">
+
+        <div class="col-lg-12">
+          <div class="blog-detailss-wrap">
+            <div class="details__content">
+              <h2>{{post.title}}</h2>
+              <div class="meta-info">
+                <ul>
+                  <li><i class="fal fa-eye"></i> 100 Views</li>
+                  <li><i class="fal fa-comments"></i> 35 Comments</li>
+                  <li>
+                    <!-- prettier-ignore -->
+                    <i class="fal fa-calendar-alt"></i>
+                    {{post.publish|date:"d F Y"}}
+                  </li>
+                </ul>
+              </div>
+              <p>{{post.body|truncatewords:100}}</p>
+            </div>
+            <div id="comments" class="comments-area mt-25">
+              <div id="respond" class="comment-respond">
+                {% if sent %}
+                <div class="alert alert-success" role="alert" style="border-radius: 15px;">
+                  The post has been shared successfully! Thank you for spreading the word.<a href="{{post.get_absolute_url}}" class="body-color"> Return to the post</a>
+                </div>
+                {% endif %}
+                <h3 id="reply-title" class="comment-reply-title">
+                  Share a blog
+                </h3>
+
+                <form
+                  action="{{ post.get_absolute_url }}/share"
+                  method="post"
+                  id="shareform"
+                  class="comment-form"
+                  novalidate=""
+                >
+                {% if form.errors %}
+                  <p class="comment-notes">
+                    <span id="email-notes"
+                      >Please fix the errors below to complete the sharing process.</span
+                    >
+                  </p>
+                {% endif %}
+                  <p class="comment-field">
+                    <i class="fas fa-user"></i>
+                    {% comment %}
+                    <input
+                      id="author"
+                      placeholder="Your Name"
+                      name="author"
+                      type="text"
+                    />
+                    <!-- prettier-ignore -->
+                    {% endcomment %} 
+                    {% for error in form.name.errors %}
+                    <div style="color: #c5015f;">{{ error }}</div>
+                    {% endfor %}
+                    {{form.name}}
+                  </p>
+                  <p class="comment-field">
+                    <i class="fas fa-envelope"></i>
+                    <!-- prettier-ignore -->
+                    {% for error in form.from_email.errors %}
+                        <div style="color: #c5015f;">{{ error }}</div>
+                    {% endfor %}
+
+                    {{form.from_email}} 
+                    {% comment %}
+                    <input
+                      id="email"
+                      placeholder="your-real-email@example.com"
+                      name="email"
+                      type="text"
+                    />
+                    {% endcomment %}
+                  </p>
+                  <p class="comment-field">
+                    <i class="fas fa-envelope"></i>
+                    <!-- prettier-ignore -->
+                    {% for error in form.to_email.errors %}
+                    <div style="color: #c5015f;">{{ error }}</div>
+                    {% endfor %}
+                    {{form.to_email}} 
+                    {% comment %}
+                    <input
+                      id="url"
+                      name="url"
+                      placeholder="http://your-site-name.com"
+                      type="text"
+                    />
+                    {% endcomment %}
+                  </p>
+                  <p class="comment-form-comment">
+                    <label for="comment">Comment</label>
+                    <!-- prettier-ignore -->
+                    {{form.comment}} 
+                    {% comment %}
+                    <textarea
+                      id="comment"
+                      name="comment"
+                      cols="45"
+                      rows="8"
+                      maxlength="65525"
+                      required="required"
+                    ></textarea>
+                    {% endcomment %}
+                  </p>
+                  <p class="form-submit">
+                    <input
+                      name="submit"
+                      type="submit"
+                      id="submit"
+                      class="submit"
+                      value="Post Comment"
+                    />
+                  </p>
+                  {% csrf_token %}
+                </form>
+              </div>
+              <!-- #respond -->
+            </div>
+          </div>
+        </div>
+        <!-- #right side -->
+
+        <!-- #right side end -->
+      </div>
+    </div>
+  </section>
+  <!-- inner-blog-end -->
+</main>
+{% endblock %}
