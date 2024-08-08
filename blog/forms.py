@@ -1,4 +1,5 @@
 from django import forms
+from .models import Comment
 
 
 class SharePostForm(forms.Form):
@@ -37,3 +38,41 @@ class SharePostForm(forms.Form):
             }
         )
     )
+
+
+class CommentForm(forms.ModelForm):
+    comment_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = Comment
+        fields = ('name', 'email', 'body', 'comment_id')
+        widgets = {
+            'name': forms.TextInput(
+                attrs={
+                    'placeholder': 'Your Name',
+                    'name': 'author',
+                    'id': 'author',
+                    'min_length': 3,
+                    'required': True
+                }
+            ),
+            'email': forms.EmailInput(
+                attrs={
+                    'placeholder': 'your-real-email@example.com',
+                    'name': 'from_email',
+                    'id': 'from_email',
+                    'required': True
+                }
+            ),
+            'body': forms.Textarea(
+                attrs={
+                    'id': 'comment',
+                    'name': 'comment',
+                    'cols': 45,
+                    'rows': 8,
+                    'maxlength': 65525,
+                    'placeholder': 'Comment',
+                    'required': True
+                }
+            )
+        }

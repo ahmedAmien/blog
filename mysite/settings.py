@@ -24,6 +24,7 @@ SECRET_KEY = 'django-insecure-ne2m!%*%c-4grkvpup5(#i*wgm(%3-89%g*z$3hr%7wi@!h!9x
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TAGGIT_CASE_INSENSITIVE = True
 
 ALLOWED_HOSTS = []
 
@@ -37,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'taggit',
+
     'blog'
 ]
 

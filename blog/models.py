@@ -2,6 +2,9 @@ from django.db import models
 from django.conf import settings
 from django.urls import reverse
 from django.db.models.functions import Now
+from django.core.validators import MinLengthValidator
+from taggit.managers import TaggableManager
+
 # Create your models here.
 
 
@@ -34,6 +37,7 @@ class Post(models.Model):
     )
 
     objects = models.Manager()
+    tags = TaggableManager()
     published = PublishedManager()
 
     class Meta:
@@ -55,9 +59,9 @@ class Comment(models.Model):
         related_name="comments",
         on_delete=models.CASCADE
     )
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, validators=[MinLengthValidator(3)])
     email = models.EmailField()
-    body = models.TextField()
+    body = models.TextField(validators=[MinLengthValidator(5)])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=True)

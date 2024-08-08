@@ -2,26 +2,35 @@ from django.core.paginator import Paginator
 from django.core.mail import EmailMessage
 from django.shortcuts import render, get_object_or_404
 from .models import Post
-from .forms import SharePostForm
+from .forms import SharePostForm, CommentForm
+from taggit.models import Tag
+from django.db.models import Count
 
 
-def post_list(request):
-
+def post_list(request, tag_slug=None):
     posts = Post.published.all()
+    if tag_slug:
+        get_object_or_404(Tag, slug=tag_slug)
+        posts = Post.published.filter(tags__slug=tag_slug)
     page_number = request.GET.get('page', 1)
     paginator = Paginator(posts, 6)
+    tags = Tag.objects.annotate(
+        number_of_posts=Count('taggit_taggeditem_items')).order_by('-number_of_posts')[:9]
 
     try:
         page = paginator.page(page_number)
     except:
         page = paginator.page(1)
-    print(posts)
+
     return render(request, 'blog/blog.html', {
-        "page": page
+        "page": page,
+        "tags": tags
     })
 
 
 def post_detail(request, year, month, day, slug):
+    comment_form = CommentForm
+    valid = True
     post = get_object_or_404(
         Post,
         created__year=year,
@@ -30,8 +39,29 @@ def post_detail(request, year, month, day, slug):
         slug=slug
     )
 
+    if request.method == 'POST':
+        valid = False
+        comment = request.GET.get('comment')
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            valid = True
+            comment = comment_form.save(commit=False)
+            comment.post = post
+            comment.save()
+            comment_form = CommentForm()
+
+    related_posts = Post.objects.all().exclude(id=post.id)
+    if post.tags:
+        tags_ids = post.tags.values_list('id', flat=True)
+        related_posts = related_posts.filter(
+            tags__id__in=tags_ids)
+        related_posts = related_posts.annotate(
+            tags_count=Count("tags")).order_by('-tags_count')[:2]
     return render(request, 'blog/blog-details.html', {
-        "post": post
+        "post": post,
+        "comment_form": comment_form,
+        "valid": valid,
+        "related_posts": related_posts,
     })
 
 

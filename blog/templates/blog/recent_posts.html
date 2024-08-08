@@ -1,0 +1,14 @@
+{% if recent_posts %}
+
+<section id="recent-posts-4" class="widget widget_recent_entries">
+  <h2 class="widget-title">Recent Posts</h2>
+  <ul>
+    {% for post in recent_posts %}
+    <li>
+      <a href="{{post.get_absolute_url}}">{{post.title|truncatechars:45}}</a>
+      <span class="post-date">{{ post.publish|date:"F j, Y" }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}

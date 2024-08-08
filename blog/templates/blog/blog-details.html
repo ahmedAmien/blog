@@ -2,6 +2,7 @@
 
 {% extends 'blog/base.html' %} 
 {% load static %} 
+{% load blog_tags %}
 {% block title %}
 {{post.title}} 
 {% endblock %}
@@ -81,26 +82,38 @@
                   Aesthetic polaroid pug pitchfork post-ironic.
                 </h3>
               </blockquote>
-
+              {% if post.tags.all %}
               <div class="row">
                 <div class="col-xl-12 col-md-12">
                   <div class="post__tag">
                     <h5>Releted Tags</h5>
                     <ul>
-                      <li><a href="#">organic</a></li>
-                      <li><a href="#">Foods</a></li>
-                      <li><a href="#">tasty</a></li>
+                      {% for tag in post.tags.all %}
+                      <li>
+                        <!-- prettier-ignore -->
+
+                        <a href="{% url 'blog:tag-post-list' tag.slug %}">{{tag}}</a
+                        >
+                      </li>
+                      {% endfor %}
                     </ul>
                   </div>
                 </div>
               </div>
+              {% endif %}
             </div>
+            <!-- prettier-ignore -->
+            {% get_most_comments_posts post.id as most_comments_posts %} 
+            {% if most_comments_posts|length >= 2 %}
             <div class="posts_navigation pt-35 pb-35">
               <div class="row align-items-center">
                 <div class="col-xl-4 col-md-5">
                   <div class="prev-link">
                     <span>Prev Post</span>
-                    <h4><a href="#">Tips Minimalist</a></h4>
+                    <h4>
+                      <!-- prettier-ignore -->
+                      <a href="{{ most_comments_posts.1.absolute_url }}">{{ most_comments_posts.1.title|truncatechars:10 }}</a>
+                    </h4>
                   </div>
                 </div>
                 <div class="col-xl-4 col-md-2 text-left text-md-center">
@@ -111,16 +124,24 @@
                 <div class="col-xl-4 col-md-5">
                   <div class="next-link text-left text-md-right">
                     <span>next Post</span>
-                    <h4><a href="#">Less Is More</a></h4>
+                    <!-- prettier-ignore -->
+                    <h4>
+                    <a href="{{ most_comments_posts.0.absolute_url }}">{{ most_comments_posts.0.title|truncatechars:10 }}</a>
+                  </h4>
                   </div>
                 </div>
               </div>
             </div>
+            {% endif %}
+            <!-- prettier-ignore -->
+
+            {% if related_posts %}
             <div class="related__post mt-45 mb-85">
               <div class="post-title">
                 <h4>Related Post</h4>
               </div>
               <div class="row">
+                {% for related_post in related_posts%}
                 <div class="col-md-6">
                   <div class="related-post-wrap mb-30">
                     <div class="post-thumb">
@@ -128,35 +149,22 @@
                     </div>
                     <div class="rp__content">
                       <h3>
-                        <a href="#">A series of iOS 7 inspire vector icons.</a>
+                        <a href="{{related_post.absolute_url}}"
+                          >{{related_post.title}}</a
+                        >
                       </h3>
                       <p>
-                        Lorem ipsum dolor sit amet, consectet ur adipisicing
-                        elit, sed do eiusmod temp or incididunt ut labore et
-                        dolore.
+                        <!-- prettier-ignore -->
+
+                        {{related_post.body|truncatechars:190 }}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="related-post-wrap mb-30">
-                    <div class="post-thumb">
-                      <img src="img/blog/b_details04.jpg" alt="" />
-                    </div>
-                    <div class="rp__content">
-                      <h3>
-                        <a href="#">Sed ut perspiciatis unde omnis.</a>
-                      </h3>
-                      <p>
-                        Lorem ipsum dolor sit amet, consectet ur adipisicing
-                        elit, sed do eiusmod temp or incididunt ut labore et
-                        dolore.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {% endfor %}
               </div>
             </div>
+            {% endif %}
             <div class="avatar__wrap text-center mb-45">
               <div class="avatar-img">
                 <img src="img/blog/comment/avatar.png" alt="" />
@@ -192,10 +200,13 @@
                 </div>
                 <div class="comment-text">
                   <div class="avatar-name mb-15">
-                    <h6>{{comment.name}}</h6>
+                    <h6>{{comment.name|title}}</h6>
                     <span>{{ comment.created|date:"jS F Y" }}</span>
-                    <a href="#" class="comment-reply"
-                      ><i class="fas fa-reply"></i>Reply</a
+                    <a
+                      href="#"
+                      class="comment-reply"
+                      data-comment-id="{{ comment.id }}"
+                      ><i class="fas fa-reply"></i> Reply</a
                     >
                   </div>
                   <p>{{comment.body}}</p>
@@ -210,8 +221,11 @@
                   <div class="avatar-name mb-15">
                     <h6>{{replay.name}} <i class="fas fa-bookmark"></i></h6>
                     <span>{{ replay.created|date:"jS F Y" }}</span>
-                    <a href="#" class="comment-reply"
-                      ><i class="fas fa-reply"></i>Reply</a
+                    <a
+                      href="#"
+                      class="comment-reply"
+                      data-comment-id="{{ comment.id }}"
+                      ><i class="fas fa-reply"></i> Reply</a
                     >
                   </div>
                   <p>{{replay.body}}</p>
@@ -220,13 +234,13 @@
               <!-- prettier-ignore -->
               {% endfor %} 
               {% empty %}
-              <h6>No comments</h6>
+              <h6>No comments yet.</h6>
               {% endfor %}
             </div>
             <div id="comments" class="comments-area mt-45">
               <div id="respond" class="comment-respond">
                 <h3 id="reply-title" class="comment-reply-title">
-                  Leave a Reply
+                  Leave a Comment
                   <small
                     ><a
                       rel="nofollow"
@@ -237,80 +251,8 @@
                     ></small
                   >
                 </h3>
-                <form
-                  action="http://wordpress.zcube.in/finco/wp-comments-post.php"
-                  method="post"
-                  id="commentform"
-                  class="comment-form"
-                  novalidate=""
-                >
-                  <p class="comment-notes">
-                    <span id="email-notes"
-                      >Your email address will not be published.</span
-                    >
-                    Required fields are marked
-                    <span class="required">*</span>
-                  </p>
-                  <p class="comment-field">
-                    <i class="fas fa-user"></i
-                    ><input
-                      id="author"
-                      placeholder="Your Name"
-                      name="author"
-                      type="text"
-                    />
-                  </p>
-                  <p class="comment-field">
-                    <i class="fas fa-envelope"></i
-                    ><input
-                      id="email"
-                      placeholder="your-real-email@example.com"
-                      name="email"
-                      type="text"
-                    />
-                  </p>
-                  <p class="comment-field">
-                    <i class="fas fa-globe"></i
-                    ><input
-                      id="url"
-                      name="url"
-                      placeholder="http://your-site-name.com"
-                      type="text"
-                    />
-                  </p>
-                  <p class="comment-form-comment">
-                    <label for="comment">Comment</label>
-                    <textarea
-                      id="comment"
-                      name="comment"
-                      cols="45"
-                      rows="8"
-                      maxlength="65525"
-                      required="required"
-                    ></textarea>
-                  </p>
-                  <p class="form-submit">
-                    <input
-                      name="submit"
-                      type="submit"
-                      id="submit"
-                      class="submit"
-                      value="Post Comment"
-                    />
-                    <input
-                      type="hidden"
-                      name="comment_post_ID"
-                      value="2112"
-                      id="comment_post_ID"
-                    />
-                    <input
-                      type="hidden"
-                      name="comment_parent"
-                      id="comment_parent"
-                      value="0"
-                    />
-                  </p>
-                </form>
+                <!-- prettier-ignore -->
+                {% include "blog/comment_replay_form.html" with comment_form=comment_form %}
               </div>
               <!-- #respond -->
             </div>
@@ -371,81 +313,9 @@
                 </li>
               </ul>
             </section>
-            <section id="recent-posts-4" class="widget widget_recent_entries">
-              <h2 class="widget-title">Recent Posts</h2>
-              <ul>
-                <li>
-                  <a href="#"
-                    >User Experience Psychology And Performance Smshing</a
-                  >
-                  <span class="post-date">August 19, 2020</span>
-                </li>
-                <li>
-                  <a href="#">Monthly Web Development Up Cost Of JavaScript</a>
-                  <span class="post-date">August 19, 2020</span>
-                </li>
-                <li>
-                  <a href="#"
-                    >There are many variation passages of like available.</a
-                  >
-                  <span class="post-date">August 19, 2020</span>
-                </li>
-              </ul>
-            </section>
-            <section id="tag_cloud-1" class="widget widget_tag_cloud">
-              <h2 class="widget-title">Tag</h2>
-              <div class="tagcloud">
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-28 tag-link-position-1"
-                  style="font-size: 8pt"
-                  aria-label="app (1 item)"
-                  >app</a
-                >
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-17 tag-link-position-2"
-                  style="font-size: 8pt"
-                  aria-label="Branding (1 item)"
-                  >Branding</a
-                >
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-20 tag-link-position-3"
-                  style="font-size: 8pt"
-                  aria-label="corporat (1 item)"
-                  >corporat</a
-                >
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-24 tag-link-position-4"
-                  style="font-size: 16.4pt"
-                  aria-label="Design (2 items)"
-                  >Design</a
-                >
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-25 tag-link-position-5"
-                  style="font-size: 22pt"
-                  aria-label="gallery (3 items)"
-                  >gallery</a
-                >
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-26 tag-link-position-6"
-                  style="font-size: 8pt"
-                  aria-label="video (1 item)"
-                  >video</a
-                >
-                <a
-                  href="#"
-                  class="tag-cloud-link tag-link-29 tag-link-position-7"
-                  style="font-size: 16.4pt"
-                  aria-label="web design (2 items)"
-                  >web design</a
-                >
-              </div>
-            </section>
+            <!-- prettier-ignore -->
+            {% recent_posts %} 
+            {% recent_tags %}
           </aside>
         </div>
         <!-- #right side end -->
@@ -455,4 +325,37 @@
 
   <!-- inner-blog-end -->
 </main>
+<div id="replyPopup" style="display: none">
+  <!-- prettier-ignore -->
+  {% include "blog/comment_replay_form.html" with comment_form=comment_form %}
+  <button onclick="closePopup()" class="close_form">Close</button>
+</div>
+<script>
+  document.querySelectorAll(".comment-reply").forEach((link) => {
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+      var popup = document.getElementById("replyPopup");
+      popup.style.display = "block";
+    });
+  });
+
+  function showPopup() {
+    document.getElementById("id_comment_id").value = commentId;
+
+    var popup = document.getElementById("replyPopup");
+    popup.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closePopup() {
+    var popup = document.getElementById("replyPopup");
+    popup.style.display = "none";
+    document.body.style.overflow = "auto"; // Re-enables scrolling on the body
+  }
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      closePopup();
+    }
+  });
+</script>
 {% endblock %}
